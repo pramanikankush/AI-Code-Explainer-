@@ -18,3 +18,11 @@ class CodeAnalysisResponse(BaseModel):
 class HealthCheckResponse(BaseModel):
     status: str
     version: str
+
+class CodeChatRequest(BaseModel):
+    code: str = Field(..., description="The source code context")
+    language: str = Field(default="java", description="The programming language of the code")
+    question: str = Field(..., description="The user's question about the code")
+
+class CodeChatResponse(BaseModel):
+    answer: str = Field(..., description="Markdown formatted answer to the user's question")

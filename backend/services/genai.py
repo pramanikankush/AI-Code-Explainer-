@@ -3,7 +3,7 @@ import logging
 import google.generativeai as genai
 from fastapi import HTTPException
 from core.config import settings
-from models.schemas import CodeAnalysisRequest, CodeAnalysisResponse
+from models.schemas import CodeAnalysisRequest, CodeAnalysisResponse, CodeChatRequest, CodeChatResponse
 
 logger = logging.getLogger(__name__)
 
@@ -84,5 +84,37 @@ class GenAIService:
         except Exception as e:
             logger.error(f"GenAI API Error: {str(e)}")
             raise HTTPException(status_code=500, detail=f"AI Service Error: {str(e)}")
+
+    async def chat_code(self, request: CodeChatRequest) -> CodeChatResponse:
+        prompt = f"""
+        You are an expert developer helping a user understand their code.
+        Answer the following question about the provided {request.language} code.
+        
+        Question: {request.question}
+        
+        Code:
+        ```
+        {request.code}
+        ```
+        
+        Provide a clear, markdown-formatted answer. If the question asks for code changes, provide snippets.
+        """
+        
+        try:
+            response = await self.model.generate_content_async(
+                prompt,
+                generation_config={"response_mime_type": "application/json"}
+            )
+            result_dict = json.loads(response.text)
+            # The model might return a plain dict if it infers our intent, or an 'answer' key.
+            # Handle both scenarios safely.
+            answer_text = result_dict.get("answer", response.text)
+            return CodeChatResponse(answer=answer_text)
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse LLM JSON in chat: {e}")
+            return CodeChatResponse(answer=response.text)
+        except Exception as e:
+            logger.error(f"GenAI Chat API Error: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"AI Service Chat Error: {str(e)}")
 
 genai_service = GenAIService()

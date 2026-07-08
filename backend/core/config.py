@@ -13,6 +13,11 @@ class Settings(BaseSettings):
     # CORS Settings
     BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
+    # Rate Limiting & Cache Settings
+    RATE_LIMIT_PER_MINUTE: int = 5
+    CACHE_TTL_SECONDS: int = 3600
+    CACHE_MAX_SIZE: int = 100
+
     class Config:
         case_sensitive = True
         env_file = "../.env"
