@@ -9,6 +9,10 @@ RUN npm install
 # Copy project files
 COPY . .
 
+# Accept backend URL at build time (Render passes this as a build env var)
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 # Build the Next.js application
 RUN npm run build
 

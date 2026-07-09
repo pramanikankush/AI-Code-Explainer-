@@ -21,13 +21,18 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS,
-    allow_credentials=True,
+    allow_credentials=False,  # must be False when allow_origins=["*"]
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Include API Router
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+@app.get("/", tags=["root"])
+async def root():
+    """Root endpoint — confirms backend is live."""
+    return {"status": "ok", "message": f"{settings.PROJECT_NAME} v{settings.VERSION} is running."}
 
 @app.get("/health", response_model=HealthCheckResponse, tags=["health"])
 async def health_check():
